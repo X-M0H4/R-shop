@@ -2,17 +2,21 @@ import express from 'express';
 import mysql from 'mysql2';
 import cors from 'cors';
 import multer from 'multer';
-import path from 'path';
 import session from 'express-session';
 import { v2 as cloudinary } from 'cloudinary';
 import pkg from 'multer-storage-cloudinary';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
 const { CloudinaryStorage } = pkg;
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
 // Configure Cloudinary
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'dqdusz5ci',
