@@ -2,43 +2,27 @@ import express from 'express';
 import mysql from 'mysql2';
 import cors from 'cors';
 import multer from 'multer';
-import session from 'express-session';
-import { v2 as cloudinary } from 'cloudinary';
-import pkg from 'multer-storage-cloudinary';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+import path from 'path';
+import dotenv from 'dotenv';
 
-const { CloudinaryStorage } = pkg;
+// Charger les variables d'environnement
+dotenv.config();
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
+// Créer une instance d'Express
 const app = express();
+
 app.use(express.json());
 app.use(cors());
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-// Configure Cloudinary
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'dqdusz5ci',
-  api_key: process.env.CLOUDINARY_API_KEY || '668465652653965',
-  api_secret: process.env.CLOUDINARY_API_SECRET || '<LpF7D-Ct88blCFd6cctH5P2m-sY>' // Replace with your Cloudinary API secret
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+
+// Configuration de la connexion MySQL
+const connection = mysql.createConnection({
+  host: 'localhost',
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME
 });
 
-// Configure Cloudinary storage
-const storage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params: {
-    folder: 'uploads',
-    allowed_formats: ['jpg', 'png', 'jpeg'],
-  },
-});
-
-const upload = multer({ storage: storage });
-
-// Create a MySQL connection using JawsDB URL
-const connection = mysql.createConnection(process.env.JAWSDB_URL);
-
-// Check for errors
 connection.connect(err => {
   if (err) {
     console.error('Error connecting to MySQL:', err);
@@ -47,15 +31,18 @@ connection.connect(err => {
   console.log('Connected to MySQL');
 });
 
-// Session configuration
-app.use(session({
-  secret: process.env.SESSION_SECRET || 'your_secret',
-  resave: false,
-  saveUninitialized: true,
-  cookie: { secure: false } // Set to true if using HTTPS
-}));
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/');
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + '-' + file.originalname);
+  }
+});
 
-// Fetch all products
+const upload = multer({ storage: storage });
+
+// Utilisation de l'instance app pour définir des routes
 app.get('/products', (req, res) => {
   connection.query('SELECT * FROM produits', (err, results) => {
     if (err) {
@@ -64,15 +51,17 @@ app.get('/products', (req, res) => {
     res.json(results);
   });
 });
-
-// Add a new product
 app.post('/products', upload.single('productImage'), (req, res) => {
   const { productName, productPrice, productSizes } = req.body;
-  const image = req.file ? req.file.path : null;
+  const image = req.file ? `/uploads/${req.file.filename}` : null;
 
   const name = productName;
   const price = parseFloat(productPrice);
   const sizes = productSizes;
+
+  if (isNaN(price)) {
+    return res.status(400).json({ message: 'Invalid price value' });
+  }
 
   connection.query(
     'INSERT INTO produits (nom, prix, image, tailles) VALUES (?, ?, ?, ?)',
@@ -87,33 +76,27 @@ app.post('/products', upload.single('productImage'), (req, res) => {
   );
 });
 
-// Update a product
-app.put('/products/:id', upload.single('productImage'), (req, res) => {
-  const id = req.params.id;
-  const { productName, productPrice, productSizes } = req.body;
-  const image = req.file ? req.file.path : null;
+app.put('/products/:id', (req, res) => {
+  const { id } = req.params;
+  const { nom, prix, tailles } = req.body;
 
-  const name = productName;
-  const price = parseFloat(productPrice);
-  const sizes = productSizes;
+  const price = parseFloat(prix);
+  if (isNaN(price)) {
+    return res.status(400).json({ message: 'Invalid price value' });
+  }
 
-  const imageQuery = image ? `, image = ?` : '';
-  const queryParams = image ? [name, price, image, sizes, id] : [name, price, sizes, id];
+  const query = 'UPDATE produits SET nom = ?, prix = ?, tailles = ? WHERE id = ?';
+  const values = [nom, price, tailles, id];
 
-  connection.query(
-    `UPDATE produits SET nom = ?, prix = ?${imageQuery}, tailles = ? WHERE id = ?`,
-    queryParams,
-    (err) => {
-      if (err) {
-        console.error(err);
-        return res.status(500).send('Error updating product');
-      }
-      res.send('Product updated successfully');
+  connection.query(query, values, (err, result) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ message: 'Error updating product', error: err });
     }
-  );
+    res.json({ message: 'Product updated successfully', nom, prix: price, tailles });
+  });
 });
 
-// Delete a product
 app.delete('/products/:id', (req, res) => {
   const { id } = req.params;
 
@@ -125,5 +108,5 @@ app.delete('/products/:id', (req, res) => {
   });
 });
 
-const port = process.env.PORT || 3000;
-app.listen(port, () => console.log(`Server is running on port ${port}`));
+const port = 3000;
+app.listen(port, () => console.log(`Server running on port ${port}`));

@@ -1,14 +1,16 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>R-shop</title>
     <link rel="icon" type="image/png" href="images/logo.png">
-    <link rel="stylesheet" href="styles.css">     
+    <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
 </head>
+
 <body>
     <header>
         <nav>
@@ -31,7 +33,7 @@
             </div>
         </div>
     </header>
-    
+
     <section id="produits">
         <h2>Nos Produits</h2>
         <ul id="productList">
@@ -57,7 +59,7 @@
             <label for="productName">Nom du produit</label>
             <input type="text" id="productName" name="productName" required>
             <label for="productPrice">Prix du produit</label>
-            <input type="number" id="productPrice" name="productPrice" required>
+            <input type="number" id="productPrice" name="productPrice" required step="0.01">
             <label for="productImage">Image du produit</label>
             <input type="file" id="productImage" name="productImage" accept="image/*" required>
             <label for="productSizes">Tailles disponibles (séparées par des virgules)</label>
@@ -90,10 +92,9 @@
     </footer>
 
     <script>
-        let isAdminLoggedIn = false; // Variable pour suivre l'état de connexion de l'administrateur
+        let isAdminLoggedIn = false;
 
-        // Récupérer les produits lors du chargement de la page
-        window.onload = function() {
+        window.onload = function () {
             fetch('http://localhost:3000/products')
                 .then(response => response.json())
                 .then(products => {
@@ -106,7 +107,6 @@
                 });
         };
 
-        // Function to add product to the page
         function addProductToPage(id, name, price, image, sizes) {
             const newProduct = document.createElement("li");
             const sizesList = sizes.length > 0 ? sizes.join(", ") : "Non disponible";
@@ -123,15 +123,12 @@
                 </select>
                 <button class="editBtn" data-id="${id}" style="display:${isAdminLoggedIn ? 'inline-block' : 'none'};">Modifier</button>
                 <button class="deleteBtn" data-id="${id}" style="display:${isAdminLoggedIn ? 'inline-block' : 'none'};">Supprimer</button>
-                <a href="#" target="_blank" class="whatsappBtn" style="display:inline-block; margin-left:10px; text-decoration:none; color:green;" data-name="${encodeURIComponent(name)}">
-                    <i class="fa fa-whatsapp"></i> Contacter sur WhatsApp
-                </a>
                 <div class="editForm" style="display:none;">
                     <h4>Modifier le produit</h4>
                     <label for="editProductName">Nom du produit</label>
                     <input type="text" id="editProductName" value="${name}">
                     <label for="editProductPrice">Prix du produit</label>
-                    <input type="number" id="editProductPrice" value="${price}">
+                    <input type="number" id="editProductPrice" value="${price}" step="0.01">
                     <label for="editProductSizes">Tailles disponibles (séparées par des virgules)</label>
                     <input type="text" id="editProductSizes" value="${sizes.join(", ")}">
                     <button class="saveEditBtn" data-id="${id}">Sauvegarder</button>
@@ -140,77 +137,35 @@
             `;
             document.getElementById("productList").appendChild(newProduct);
 
-            // Add events for edit and delete buttons
-            newProduct.querySelector(".deleteBtn").addEventListener("click", function() {
-                deleteProduct(id);
-            });
-
-            newProduct.querySelector(".editBtn").addEventListener("click", function() {
+            newProduct.querySelector(".editBtn").addEventListener("click", function () {
                 const editForm = newProduct.querySelector(".editForm");
                 editForm.style.display = editForm.style.display === "none" ? "block" : "none";
             });
 
-            newProduct.querySelector(".saveEditBtn").addEventListener("click", function() {
+            newProduct.querySelector(".saveEditBtn").addEventListener("click", function () {
                 updateProduct(id, newProduct);
             });
-            
-            newProduct.querySelector(".cancelEditBtn").addEventListener("click", function() {
+
+            newProduct.querySelector(".cancelEditBtn").addEventListener("click", function () {
                 newProduct.querySelector(".editForm").style.display = "none";
             });
-
-            newProduct.querySelector(".whatsappBtn").addEventListener("click", function(event) {
-                event.preventDefault();
-                const productName = this.getAttribute('data-name');
-                const selectedSize = document.getElementById(`sizeSelect_${id}`).value;
-                const whatsappNumber = '212671878417';
-
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(function(position) {
-                        const latitude = position.coords.latitude;
-                        const longitude = position.coords.longitude;
-                        const location = `Localisation du client : https://www.google.com/maps?q=${latitude},${longitude}`;
-                        const whatsappLink = `https://wa.me/${whatsappNumber}?text=Je%20suis%20intéressé%20par%20le%20produit%20${productName}%20en%20taille%20${selectedSize}%0A${encodeURIComponent(location)}`;
-                        window.open(whatsappLink, '_blank');
-                    }, function(error) {
-                        console.error('Erreur de géolocalisation:', error);
-                        const whatsappLink = `https://wa.me/${whatsappNumber}?text=Je%20suis%20intéressé%20par%20le%20produit%20${productName}%20en%20taille%20${selectedSize}`;
-                        window.open(whatsappLink, '_blank');
-                    });
-                } else {
-                    const whatsappLink = `https://wa.me/${whatsappNumber}?text=Je%20suis%20intéressé%20par%20le%20produit%20${productName}%20en%20taille%20${selectedSize}`;
-                    window.open(whatsappLink, '_blank');
-                }
-            });
         }
 
-        // Delete product function
-        function deleteProduct(productId) {
-            fetch(`http://localhost:3000/products/${productId}`, {
-                method: 'DELETE'
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Produit supprimé:', data);
-                const productItems = document.querySelectorAll("#productList li");
-                productItems.forEach(item => {
-                    if (item.querySelector(".deleteBtn").getAttribute("data-id") === productId) {
-                        item.remove();
-                    }
-                });
-            })
-            .catch((error) => {
-                console.error('Erreur lors de la suppression du produit:', error);
-            });
-        }
-
-        // Update product function
         function updateProduct(productId, productElement) {
             const name = productElement.querySelector("#editProductName").value;
-            const price = productElement.querySelector("#editProductPrice").value;
+            const priceInput = productElement.querySelector("#editProductPrice").value;
+            const price = parseFloat(priceInput);
+
+            if (isNaN(price)) {
+                console.error('Le prix est NaN. Veuillez saisir une valeur numérique valide.');
+                alert('Veuillez entrer un prix valide.');
+                return;
+            }
+
             const sizes = productElement.querySelector("#editProductSizes").value.split(',').map(size => size.trim());
 
             const updatedProduct = {
-                nom: name,
+                nom: name || null,
                 prix: price,
                 tailles: sizes.join(',')
             };
@@ -231,7 +186,7 @@
             .then(data => {
                 console.log('Product updated:', data);
                 productElement.querySelector("h3").textContent = data.nom;
-                productElement.querySelector("p").textContent = `Prix : ${data.prix} DH`;
+                productElement.querySelectorAll("p")[0].textContent = `Prix : ${data.prix} DH`;
                 productElement.querySelectorAll("p")[1].textContent = `Tailles disponibles : ${data.tailles}`;
                 productElement.querySelector(".editForm").style.display = "none";
             })
@@ -240,10 +195,9 @@
             });
         }
 
-        // Add product via form
-        document.getElementById("addProductForm").addEventListener("submit", function(event) {
+        document.getElementById("addProductForm").addEventListener("submit", function (event) {
             event.preventDefault();
-            
+
             const productName = document.getElementById("productName").value;
             const productPrice = document.getElementById("productPrice").value;
             const productImage = document.getElementById("productImage").files[0];
@@ -271,14 +225,13 @@
             });
         });
 
-        // Admin login management
-        document.getElementById("loginButton").addEventListener("click", function() {
+        document.getElementById("loginButton").addEventListener("click", function () {
             document.getElementById("loginFormSection").style.display = "block";
         });
 
-        document.getElementById("loginForm").addEventListener("submit", function(event) {
+        document.getElementById("loginForm").addEventListener("submit", function (event) {
             event.preventDefault();
-            
+
             const username = document.getElementById("username").value;
             const password = document.getElementById("password").value;
 
@@ -298,7 +251,7 @@
             }
         });
 
-        document.getElementById("logoutButton").addEventListener("click", function() {
+        document.getElementById("logoutButton").addEventListener("click", function () {
             isAdminLoggedIn = false;
             localStorage.removeItem('isAdminLoggedIn');
             document.getElementById("addProductSection").style.display = "none";
@@ -311,4 +264,5 @@
         });
     </script>
 </body>
+
 </html>

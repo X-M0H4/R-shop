@@ -1,4 +1,2 @@
-
-# Ignore node modules
 node_modules/
-* text=auto
+.env
