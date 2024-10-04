@@ -5,8 +5,8 @@ import multer from 'multer';
 import path from 'path';
 import session from 'express-session';
 import { v2 as cloudinary } from 'cloudinary';
-import { CloudinaryStorage } from 'multer-storage-cloudinary';
-
+import pkg from 'multer-storage-cloudinary';
+const { CloudinaryStorage } = pkg;
 
 const app = express();
 app.use(express.json());
@@ -14,9 +14,9 @@ app.use(cors());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Configure Cloudinary
-cloudinary.config({ 
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'dqdusz5ci', 
-  api_key: process.env.CLOUDINARY_API_KEY || '668465652653965', 
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'dqdusz5ci',
+  api_key: process.env.CLOUDINARY_API_KEY || '668465652653965',
   api_secret: process.env.CLOUDINARY_API_SECRET || '<LpF7D-Ct88blCFd6cctH5P2m-sY>' // Replace with your Cloudinary API secret
 });
 
@@ -32,14 +32,9 @@ const storage = new CloudinaryStorage({
 const upload = multer({ storage: storage });
 
 // Create a MySQL connection using JawsDB URL
-const connection = mysql.createConnection(process.env.JAWSDB_URL || {
-  host: 'localhost',
-  user: 'root',
-  password: 'Moon$$o001',
-  database: 'rshop',
-});
+const connection = mysql.createConnection(process.env.JAWSDB_URL);
 
-
+// Check for errors
 connection.connect(err => {
   if (err) {
     console.error('Error connecting to MySQL:', err);
@@ -128,5 +123,3 @@ app.delete('/products/:id', (req, res) => {
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`Server is running on port ${port}`));
-
-
