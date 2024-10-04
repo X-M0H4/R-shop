@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>À Propos - R-shop</title>
+    <link rel="icon" type="image/png" href="images/logo1.png">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        header {
+            width: 100%;
+            background-color: #333;
+            color: white;
+            padding: 10px 0;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 15px;
+            padding: 0;
+            margin: 0;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        nav a:hover {
+            text-decoration: underline;
+        }
+
+        #logoImage {
+            max-width: 150px;
+            height: auto;
+        }
+
+        main {
+            max-width: 800px;
+            width: 100%;
+            padding: 20px;
+            text-align: center;
+        }
+
+        main h1 {
+            margin-bottom: 20px;
+        }
+
+        main p {
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .text-content {
+            text-align: left;
+        }
+
+        #map {
+            height: 400px;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        .photo-gallery {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .photo-gallery img {
+            width: calc(33% - 10px);
+            border-radius: 8px;
+            transition: transform 0.2s;
+        }
+
+        .photo-gallery img:hover {
+            transform: scale(1.05);
+        }
+
+        footer {
+            width: 100%;
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+            margin-top: 20px;
+        }
+
+        footer a {
+            color: white;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Media Queries pour les petits écrans */
+        @media (max-width: 768px) {
+            nav {
+                flex-direction: column;
+            }
+
+            nav ul {
+                flex-direction: column;
+                gap: 10px;
+                padding: 10px 0;
+            }
+
+            #logoImage {
+                max-width: 80%;
+            }
+
+            #map {
+                height: 300px;
+            }
+
+            .photo-gallery img {
+                width: calc(50% - 10px);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .photo-gallery img {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="index.html">
+                <img src="images/logo1.png" alt="Logo R-shop" id="logoImage" />
+            </a>
+            <ul>
+                <li><a href="index.html">Accueil</a></li>
+                <li><a href="#produits">Nos produits</a></li>
+                <li><a href="#contactForm">Nous contacter</a></li>
+                <li><a href="#" id="loginButton">Se connecter</a></li>
+                <li><a href="#" id="logoutButton" style="display:none;">Se déconnecter</a></li>
+                <li><a href="about.html">À propos</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <h1>À Propos de R-shop</h1>
+        <div class="text-content">
+            <p>Le 24-06-2023, le magasin R Shop de prêt-à-porter pour femmes situé à Larache a vu le jour, fondé par des passionnées de mode désireuses d'apporter une touche innovante à l'industrie vestimentaire. Nous proposons une collection variée, mettant en avant des pièces tendance et accessibles, allant du casual au chic. On s'inspire des dernières tendances tout en privilégiant des matériaux durables et un savoir-faire artisanal. Nous croyons fermement en la diversité des silhouettes et estimons que chaque femme doit être fière de son corps. Pour nous, il n'existe pas de mauvaises silhouettes, il s'agit plutôt de savoir quoi porter et de choisir des vêtements qui mettent en valeur la morphologie de chacun. Notre objectif est de célébrer cette diversité en offrant des tailles allant du 32 au 52, tout en cultivant un esprit bohème chic qui reflète la légèreté et la créativité de la mode.</p>
+            
+            <p>On June 24, 2023, R Shop, a women's clothing store located in Larache, was established by fashion enthusiasts eager to bring an innovative touch to the clothing industry. We offer a diverse collection featuring trendy and accessible pieces, ranging from casual to chic. Our inspiration comes from the latest trends while prioritizing sustainable materials and artisanal craftsmanship. We firmly believe in the diversity of silhouettes and that every woman should take pride in her body. For us, there are no bad silhouettes, it's about knowing what to wear and choosing clothes that enhance each individual's morphology. Our goal is to celebrate this diversity by offering sizes from 32 to 52, while cultivating a bohemian chic spirit that reflects the lightness and creativity of fashion.</p>
+            <p>Où nous trouver : <a href="https://maps.app.goo.gl/QGYvAFxPC9ivnEJYA" target="_blank">Cliquez ici</a></p>
+        </div>
+
+        <!-- Intégration de la carte -->
+        <div id="map"></div>
+
+        <!-- Store Photos Section -->
+        <section id="storePhotos">
+            <h2>Notre Magasin</h2>
+            <div class="photo-gallery">
+                <img src="images/store1.jpg" alt="Photo du magasin 1">
+                <img src="images/store2.jpg" alt="Photo du magasin 2">
+                <img src="images/store3.jpg" alt="Photo du magasin 3">
+                <!-- Add more photos as needed -->
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div id="icons">
+            <a href="https://www.instagram.com/r_shop_maroc?igsh=OHRpNzdramllMTJj" aria-label="Instagram"><i class="fa fa-instagram"></i></a>
+        </div>
+        <div id="copyright">
+            <span>© R-Shop 2024</span>
+        </div>
+    </footer>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        // Initialisation de la carte avec Leaflet
+        const map = L.map('map').setView([35.19509746191165, -6.15435233068511], 15); // Remplace par les coordonnées de ton magasin
+
+        // Ajouter une couche de carte
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Ajouter un marqueur
+        L.marker([35.19509746191165, -6.15435233068511]).addTo(map) // Remplace par les coordonnées de ton magasin
+            .bindPopup('Emplacement de R-shop')
+            .openPopup();
+    </script>
+</body>
+</html>

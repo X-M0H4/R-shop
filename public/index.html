@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>R-shop</title>
+    <link rel="icon" type="image/png" href="images/logo.png">
+    <link rel="stylesheet" href="styles.css">     
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="#">
+                <img src="images/logo1.png" alt="Logo R-shop" id="logoImage" />
+            </a>
+            <ul>
+                <li><a href="index.html">Accueil</a></li>
+                <li><a href="#produits">Nos produits</a></li>
+                <li><a href="#contactForm">Nous contacter</a></li>
+                <li><a href="#" id="loginButton">Se connecter</a></li>
+                <li><a href="#" id="logoutButton" style="display:none;">Se déconnecter</a></li>
+                <li><a href="about.html">À propos</a></li>
+            </ul>
+        </nav>
+        <div id="heroSection">
+            <div class="content">
+                <h1>R-shop</h1>
+                <h2>Donnez un nouveau style à votre quotidien</h2>
+            </div>
+        </div>
+    </header>
+    
+    <section id="produits">
+        <h2>Nos Produits</h2>
+        <ul id="productList">
+            <!-- Les produits ajoutés apparaîtront ici -->
+        </ul>
+        <button id="addProductBtn" style="display:none;">Ajouter un produit</button>
+    </section>
+
+    <section id="loginFormSection" style="display: none;">
+        <h2>Connexion Administrateur</h2>
+        <form id="loginForm">
+            <label for="username">Nom d'utilisateur</label>
+            <input type="text" id="username" name="username" required>
+            <label for="password">Mot de passe</label>
+            <input type="password" id="password" name="password" required>
+            <button type="submit">Se connecter</button>
+        </form>
+    </section>
+
+    <section id="addProductSection" style="display: none;">
+        <h2>Ajouter un Produit</h2>
+        <form id="addProductForm" enctype="multipart/form-data">
+            <label for="productName">Nom du produit</label>
+            <input type="text" id="productName" name="productName" required>
+            <label for="productPrice">Prix du produit</label>
+            <input type="number" id="productPrice" name="productPrice" required>
+            <label for="productImage">Image du produit</label>
+            <input type="file" id="productImage" name="productImage" accept="image/*" required>
+            <label for="productSizes">Tailles disponibles (séparées par des virgules)</label>
+            <input type="text" id="productSizes" name="productSizes" placeholder="Ex: S, M, L">
+            <button type="submit">Ajouter Produit</button>
+        </form>
+    </section>
+
+    <footer>
+        <div class="contact-container">
+            <form action="https://api.web3forms.com/submit" method="POST" id="contactForm" class="contact-left">
+                <input type="hidden" name="access_key" value="6e54fd27-d6le-4646-8496-46296279blle">
+                <div class="contact-left-title">
+                    <h2>Contactez-nous</h2>
+                    <hr>
+                </div>
+                <input type="text" name="name" placeholder="Votre nom" required>
+                <input type="email" name="email" placeholder="Votre email" required>
+                <textarea name="message" placeholder="Votre message" required></textarea>
+                <input type="checkbox" name="botcheck" class="hidden" style="display: none;">
+                <button type="submit">Envoyer</button>
+            </form>
+        </div>
+        <div id="icons">
+            <a href="https://www.instagram.com/r_shop_maroc?igsh=OHRpNzdramllMTJj" aria-label="Instagram"><i class="fa fa-instagram"></i></a>
+        </div>
+        <div id="copyrightEtIcons">
+            <span>©R-Shop(); 2024</span>
+        </div>
+    </footer>
+
+    <script>
+        let isAdminLoggedIn = false; // Variable pour suivre l'état de connexion de l'administrateur
+
+        // Récupérer les produits lors du chargement de la page
+        window.onload = function() {
+            fetch('http://localhost:3000/products')
+                .then(response => response.json())
+                .then(products => {
+                    products.forEach(product => {
+                        addProductToPage(product.id, product.nom, product.prix, product.image, product.tailles.split(','));
+                    });
+                })
+                .catch((error) => {
+                    console.error('Erreur lors de la récupération des produits:', error);
+                });
+        };
+
+        // Function to add product to the page
+        function addProductToPage(id, name, price, image, sizes) {
+            const newProduct = document.createElement("li");
+            const sizesList = sizes.length > 0 ? sizes.join(", ") : "Non disponible";
+            const sizeOptions = sizes.map(size => `<option value="${size}">${size}</option>`).join("");
+
+            newProduct.innerHTML = `
+                <h3>${name}</h3>
+                <p>Prix : ${price} DH</p>
+                <p>Tailles disponibles : ${sizesList}</p>
+                <img src="${image}" alt="${name}" width="100">
+                <label for="sizeSelect_${id}">Choisir la taille:</label>
+                <select id="sizeSelect_${id}">
+                    ${sizeOptions}
+                </select>
+                <button class="editBtn" data-id="${id}" style="display:${isAdminLoggedIn ? 'inline-block' : 'none'};">Modifier</button>
+                <button class="deleteBtn" data-id="${id}" style="display:${isAdminLoggedIn ? 'inline-block' : 'none'};">Supprimer</button>
+                <a href="#" target="_blank" class="whatsappBtn" style="display:inline-block; margin-left:10px; text-decoration:none; color:green;" data-name="${encodeURIComponent(name)}">
+                    <i class="fa fa-whatsapp"></i> Contacter sur WhatsApp
+                </a>
+                <div class="editForm" style="display:none;">
+                    <h4>Modifier le produit</h4>
+                    <label for="editProductName">Nom du produit</label>
+                    <input type="text" id="editProductName" value="${name}">
+                    <label for="editProductPrice">Prix du produit</label>
+                    <input type="number" id="editProductPrice" value="${price}">
+                    <label for="editProductSizes">Tailles disponibles (séparées par des virgules)</label>
+                    <input type="text" id="editProductSizes" value="${sizes.join(", ")}">
+                    <button class="saveEditBtn" data-id="${id}">Sauvegarder</button>
+                    <button class="cancelEditBtn">Annuler</button>
+                </div>
+            `;
+            document.getElementById("productList").appendChild(newProduct);
+
+            // Add events for edit and delete buttons
+            newProduct.querySelector(".deleteBtn").addEventListener("click", function() {
+                deleteProduct(id);
+            });
+
+            newProduct.querySelector(".editBtn").addEventListener("click", function() {
+                const editForm = newProduct.querySelector(".editForm");
+                editForm.style.display = editForm.style.display === "none" ? "block" : "none";
+            });
+
+            newProduct.querySelector(".saveEditBtn").addEventListener("click", function() {
+                updateProduct(id, newProduct);
+            });
+            
+            newProduct.querySelector(".cancelEditBtn").addEventListener("click", function() {
+                newProduct.querySelector(".editForm").style.display = "none";
+            });
+
+            newProduct.querySelector(".whatsappBtn").addEventListener("click", function(event) {
+                event.preventDefault();
+                const productName = this.getAttribute('data-name');
+                const selectedSize = document.getElementById(`sizeSelect_${id}`).value;
+                const whatsappNumber = '212671878417';
+
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(function(position) {
+                        const latitude = position.coords.latitude;
+                        const longitude = position.coords.longitude;
+                        const location = `Localisation du client : https://www.google.com/maps?q=${latitude},${longitude}`;
+                        const whatsappLink = `https://wa.me/${whatsappNumber}?text=Je%20suis%20intéressé%20par%20le%20produit%20${productName}%20en%20taille%20${selectedSize}%0A${encodeURIComponent(location)}`;
+                        window.open(whatsappLink, '_blank');
+                    }, function(error) {
+                        console.error('Erreur de géolocalisation:', error);
+                        const whatsappLink = `https://wa.me/${whatsappNumber}?text=Je%20suis%20intéressé%20par%20le%20produit%20${productName}%20en%20taille%20${selectedSize}`;
+                        window.open(whatsappLink, '_blank');
+                    });
+                } else {
+                    const whatsappLink = `https://wa.me/${whatsappNumber}?text=Je%20suis%20intéressé%20par%20le%20produit%20${productName}%20en%20taille%20${selectedSize}`;
+                    window.open(whatsappLink, '_blank');
+                }
+            });
+        }
+
+        // Delete product function
+        function deleteProduct(productId) {
+            fetch(`http://localhost:3000/products/${productId}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Produit supprimé:', data);
+                const productItems = document.querySelectorAll("#productList li");
+                productItems.forEach(item => {
+                    if (item.querySelector(".deleteBtn").getAttribute("data-id") === productId) {
+                        item.remove();
+                    }
+                });
+            })
+            .catch((error) => {
+                console.error('Erreur lors de la suppression du produit:', error);
+            });
+        }
+
+        // Update product function
+        function updateProduct(productId, productElement) {
+            const name = productElement.querySelector("#editProductName").value;
+            const price = productElement.querySelector("#editProductPrice").value;
+            const sizes = productElement.querySelector("#editProductSizes").value.split(',').map(size => size.trim());
+
+            const updatedProduct = {
+                nom: name,
+                prix: price,
+                tailles: sizes.join(',')
+            };
+
+            fetch(`http://localhost:3000/products/${productId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(updatedProduct)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error updating product');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Product updated:', data);
+                productElement.querySelector("h3").textContent = data.nom;
+                productElement.querySelector("p").textContent = `Prix : ${data.prix} DH`;
+                productElement.querySelectorAll("p")[1].textContent = `Tailles disponibles : ${data.tailles}`;
+                productElement.querySelector(".editForm").style.display = "none";
+            })
+            .catch(error => {
+                console.error('Error updating product:', error);
+            });
+        }
+
+        // Add product via form
+        document.getElementById("addProductForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            
+            const productName = document.getElementById("productName").value;
+            const productPrice = document.getElementById("productPrice").value;
+            const productImage = document.getElementById("productImage").files[0];
+            const productSizes = document.getElementById("productSizes").value.split(',').map(size => size.trim()).join(',');
+
+            const formData = new FormData();
+            formData.append('productName', productName);
+            formData.append('productPrice', productPrice);
+            formData.append('productImage', productImage);
+            formData.append('productSizes', productSizes);
+
+            fetch('http://localhost:3000/products', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Produit ajouté:', data);
+                addProductToPage(data.productId, productName, productPrice, `/uploads/${productImage.name}`, productSizes.split(','));
+                alert("Produit ajouté avec succès!");
+                document.getElementById("addProductForm").reset();
+            })
+            .catch((error) => {
+                console.error("Erreur lors de l'ajout du produit:", error);
+            });
+        });
+
+        // Admin login management
+        document.getElementById("loginButton").addEventListener("click", function() {
+            document.getElementById("loginFormSection").style.display = "block";
+        });
+
+        document.getElementById("loginForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+
+            if (username === "Zineb" && password === "rshop@@2024") {
+                isAdminLoggedIn = true;
+                localStorage.setItem('isAdminLoggedIn', 'true');
+                document.getElementById("loginFormSection").style.display = "none";
+                document.getElementById("addProductSection").style.display = "block";
+                document.getElementById("logoutButton").style.display = "inline-block";
+                document.getElementById("loginButton").style.display = "none";
+                document.querySelectorAll(".deleteBtn").forEach(button => {
+                    button.style.display = "inline-block";
+                    button.previousElementSibling.style.display = "inline-block";
+                });
+            } else {
+                alert("Nom d'utilisateur ou mot de passe incorrect");
+            }
+        });
+
+        document.getElementById("logoutButton").addEventListener("click", function() {
+            isAdminLoggedIn = false;
+            localStorage.removeItem('isAdminLoggedIn');
+            document.getElementById("addProductSection").style.display = "none";
+            document.getElementById("logoutButton").style.display = "none";
+            document.getElementById("loginButton").style.display = "inline-block";
+
+            document.querySelectorAll(".deleteBtn, .editBtn").forEach(button => {
+                button.style.display = "none";
+            });
+        });
+    </script>
+</body>
+</html>
