@@ -4,18 +4,38 @@ const cors = require('cors');
 const multer = require('multer');
 const path = require('path');
 const session = require('express-session');
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Create a MySQL connection
-const connection = mysql.createConnection({
+// Configure Cloudinary
+cloudinary.config({ 
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'dqdusz5ci', 
+  api_key: process.env.CLOUDINARY_API_KEY || '668465652653965', 
+  api_secret: process.env.CLOUDINARY_API_SECRET || '<LpF7D-Ct88blCFd6cctH5P2m-sY>' // Replace with your Cloudinary API secret
+});
+
+// Configure Cloudinary storage
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'uploads',
+    allowed_formats: ['jpg', 'png', 'jpeg'],
+  },
+});
+
+const upload = multer({ storage: storage });
+
+// Create a MySQL connection using JawsDB URL
+const connection = mysql.createConnection(process.env.JAWSDB_URL || {
   host: 'localhost',
   user: 'root',
   password: 'Moon$$o001',
-  database: 'rshop'
+  database: 'rshop',
 });
 
 connection.connect(err => {
@@ -28,23 +48,11 @@ connection.connect(err => {
 
 // Session configuration
 app.use(session({
-  secret: 'your_secret',
+  secret: process.env.SESSION_SECRET || 'your_secret',
   resave: false,
   saveUninitialized: true,
-  cookie: { secure: false }
+  cookie: { secure: false } // Set to true if using HTTPS
 }));
-
-// Multer setup for file uploads
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/');
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + '-' + file.originalname);
-  }
-});
-
-const upload = multer({ storage: storage });
 
 // Fetch all products
 app.get('/products', (req, res) => {
@@ -59,13 +67,11 @@ app.get('/products', (req, res) => {
 // Add a new product
 app.post('/products', upload.single('productImage'), (req, res) => {
   const { productName, productPrice, productSizes } = req.body;
-  const image = req.file ? `/uploads/${req.file.filename}` : null;
+  const image = req.file ? req.file.path : null;
 
-  const name = productName; // Ensure these match your database column names
+  const name = productName;
   const price = parseFloat(productPrice);
-  const sizes = productSizes; // This should be a string of comma-separated values
-
-  console.log('Adding product:', { name, price, image, sizes });
+  const sizes = productSizes;
 
   connection.query(
     'INSERT INTO produits (nom, prix, image, tailles) VALUES (?, ?, ?, ?)',
@@ -84,7 +90,7 @@ app.post('/products', upload.single('productImage'), (req, res) => {
 app.put('/products/:id', upload.single('productImage'), (req, res) => {
   const id = req.params.id;
   const { productName, productPrice, productSizes } = req.body;
-  const image = req.file ? `/uploads/${req.file.filename}` : null;
+  const image = req.file ? req.file.path : null;
 
   const name = productName;
   const price = parseFloat(productPrice);
@@ -119,5 +125,5 @@ app.delete('/products/:id', (req, res) => {
 });
 
 // Start the server
-const port = 3000;
+const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`Server running on port ${port}`));
