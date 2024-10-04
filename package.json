@@ -3,16 +3,37 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "build": "webpack --config webpack.config.js"
   },
   "dependencies": {
-    "express": "latest",
-    "mysql2": "latest",
-    "cors": "latest",
-    "multer": "latest",
-    "express-session": "latest",
+    "browserify-zlib": "^0.2.0",
+    "buffer": "^6.0.3",
     "cloudinary": "latest",
+    "cors": "latest",
+    "crypto-browserify": "^3.12.0",
+    "dotenv": "latest",
+    "express": "latest",
+    "express-session": "latest",
+    "multer": "latest",
     "multer-storage-cloudinary": "latest",
-    "dotenv": "latest"
+    "mysql2": "latest",
+    "os-browserify": "^0.3.0",
+    "path-browserify": "^1.0.1",
+    "process": "^0.11.10",
+    "querystring-es3": "^0.2.1",
+    "stream-browserify": "^3.0.0",
+    "stream-http": "^3.2.0",
+    "timers-browserify": "^2.0.12",
+    "url": "^0.11.4",
+    "util": "^0.12.5"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.25.7",
+    "@babel/preset-env": "^7.25.7",
+    "babel-loader": "^9.2.1",
+    "webpack": "^5.95.0",
+    "webpack-cli": "^5.1.4",
+    "webpack-node-externals": "^3.0.0"
   }
 }
