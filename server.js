@@ -38,6 +38,7 @@ const connection = mysql.createConnection(process.env.JAWSDB_URL || {
   database: 'rshop',
 });
 
+
 connection.connect(err => {
   if (err) {
     console.error('Error connecting to MySQL:', err);
@@ -125,5 +126,6 @@ app.delete('/products/:id', (req, res) => {
 });
 
 const port = process.env.PORT || 3000;
-app.listen(port, () => console.log(`Server running on port ${port}`));
+app.listen(port, () => console.log(`Server is running on port ${port}`));
+
 
