@@ -1,11 +1,12 @@
-const express = require('express');
-const mysql = require('mysql2');
-const cors = require('cors');
-const multer = require('multer');
-const path = require('path');
-const session = require('express-session');
-const cloudinary = require('cloudinary').v2;
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
+import express from 'express';
+import mysql from 'mysql2';
+import cors from 'cors';
+import multer from 'multer';
+import path from 'path';
+import session from 'express-session';
+import { v2 as cloudinary } from 'cloudinary';
+import { CloudinaryStorage } from 'multer-storage-cloudinary';
+
 
 const app = express();
 app.use(express.json());
