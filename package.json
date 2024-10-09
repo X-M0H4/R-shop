@@ -1,39 +1,28 @@
 {
   "name": "rshop2",
   "version": "1.0.0",
-  "type": "module",
   "scripts": {
-    "start": "node server.js",
-    "build": "webpack --config webpack.config.js"
-  },
-  "dependencies": {
-    "browserify-zlib": "^0.2.0",
-    "buffer": "^6.0.3",
-    "cloudinary": "latest",
-    "cors": "latest",
-    "crypto-browserify": "^3.12.0",
-    "dotenv": "latest",
-    "express": "latest",
-    "express-session": "latest",
-    "multer": "latest",
-    "multer-storage-cloudinary": "latest",
-    "mysql2": "latest",
-    "os-browserify": "^0.3.0",
-    "path-browserify": "^1.0.1",
-    "process": "^0.11.10",
-    "querystring-es3": "^0.2.1",
-    "stream-browserify": "^3.0.0",
-    "stream-http": "^3.2.0",
-    "timers-browserify": "^2.0.12",
-    "url": "^0.11.4",
-    "util": "^0.12.5"
+    "start": "node server.js" 
   },
   "devDependencies": {
-    "@babel/core": "^7.25.7",
-    "@babel/preset-env": "^7.25.7",
-    "babel-loader": "^9.2.1",
-    "webpack": "^5.95.0",
-    "webpack-cli": "^5.1.4",
-    "webpack-node-externals": "^3.0.0"
+    "browserify-zlib": "^0.2.0",
+    "css-loader": "^7.1.2",
+    "events": "^3.3.0",
+    "querystring-es3": "^0.2.1",
+    "stream-http": "^3.2.0",
+    "style-loader": "^4.0.0",
+    "vm-browserify": "^1.1.2"
+  },
+  "dependencies": {
+    "buffer": "^6.0.3",
+    "cors": "^2.8.5",
+    "crypto-browserify": "^3.12.0",
+    "dotenv": "^16.4.5",
+    "multer": "^1.4.5-lts.1",
+    "mysql2": "^3.11.3",
+    "path-browserify": "^1.0.1",
+    "stream-browserify": "^3.0.0",
+    "url": "^0.11.4",
+    "util": "^0.12.5"
   }
 }
